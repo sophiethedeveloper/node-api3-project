@@ -40,8 +40,24 @@ router.delete('/:id', validatePostId, (req, res) => { //validatePostId
   })
 });
 
-router.put('/:id', (req, res) => { // validatePostId
+router.put('/:id', validatePostId, (req, res) => { // validatePostId
   // do your magic!
+
+  Posts.update(req.params.id, req.body)
+  .then(post => {
+    if (post) {
+      res.status(200).json(post)
+    } else {
+      res.status(404).json({message: 'The post cannot be found'})
+    }
+  })
+  .catch(error => {
+    // log error to server
+    console.log(error);
+    res.status(500).json({
+      message: 'Error updating the hub',
+    });
+  });
 });
 
 // custom middleware
