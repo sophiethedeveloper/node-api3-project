@@ -5,7 +5,7 @@ const morgan = require('morgan');
 const userRouter = require('./users/userRouter')
 
 const server = express();
-
+server.use(express.json());
 server.use(morgan('dev'));
 server.use(helmet())
 server.use(logger)

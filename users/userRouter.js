@@ -4,8 +4,10 @@ const Users = require("./userDb");
 
 const router = express.Router();
 
-router.post("/", (req, res) => {
+router.post("/", (req, res) => { // create a new user
   // do your magic!
+
+  //validateUser
 });
 
 router.post("/:id/posts", (req, res) => {
@@ -31,7 +33,7 @@ router.get("/:id", validateUserId, (req, res) => {
   res.status(200).json(req.user);
 });
 
-router.get("/:id/posts", (req, res) => {
+router.get("/:id/posts", validateUserId, (req, res) => {
   // do your magic!
   const { id } = req.params;
   Users.getUserPosts(id)
@@ -49,7 +51,7 @@ router.get("/:id/posts", (req, res) => {
     });
 });
 
-router.delete("/:id", (req, res) => {
+router.delete("/:id", validateUserId, (req, res) => {
   // do your magic!
   Users.remove(req.params.id)
   .then(count => {
@@ -65,6 +67,24 @@ router.delete("/:id", (req, res) => {
 
 router.put("/:id", (req, res) => {
   // do your magic!
+
+  const { id } = req.params
+  const changes = req.body
+  
+  Users.update(id, changes)
+  .then(user => {
+    if (user) {
+      res.status(200).json(user);
+    } else {
+      res.status(404).json({message: 'The user cannot be found'})
+    }
+  })
+  .catch(error => {
+    res.status(500).json({
+      message: error.message,
+      stack: error.stack
+    })
+  })
 });
 
 //custom middleware
@@ -90,10 +110,19 @@ function validateUserId(req, res, next) {
 
 function validateUser(req, res, next) {
   // do your magic!
+  // const { name } = req.body
+  // if
 }
 
 function validatePost(req, res, next) {
   // do your magic!
+
+  const { text } = req.body
+  if(!text){
+    res.status(400).json({message: 'text is required'})
+  } else {
+    res.status
+  }
 }
 
 module.exports = router;
