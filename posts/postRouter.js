@@ -23,10 +23,6 @@ router.get('/:id', validatePostId, (req, res) => { // validatePostId
 
 });
 
-router.post('/', (req, res) => { // validatePost
-  // do your magic!
-});
-
 router.delete('/:id', validatePostId, (req, res) => { //validatePostId
   // do your magic!
   Posts.remove(req.params.id)
