@@ -5,7 +5,7 @@ const Posts = require("../posts/postDb");
 
 const router = express.Router();
 
-router.post("/", validateUser, (req, res) => { // create a new user
+router.post("/", validateUser, (req, res, next) => { // create a new user
   // do your magic!
 
   Users.insert(req.body) 
@@ -13,15 +13,13 @@ router.post("/", validateUser, (req, res) => { // create a new user
     res.status(201).json(user)
   })
   .catch(error => {
-    res.status(500).json({
-      message: error.message
-    })
+    next({ message: error.message })
   })
 
   //validateUser
 });
 
-router.post("/:id/posts", validatePost, (req, res) => {
+router.post("/:id/posts", validatePost, (req, res, next) => {
   // do your magic!
   const postInfo = {...req.body, user_id: req.params.id}
 
@@ -30,13 +28,11 @@ router.post("/:id/posts", validatePost, (req, res) => {
     res.status(201).json(post)
   })
   .catch(error => {
-    res.status(500).json({
-      message: error.message
-    })
+    next({ message: error.message })
   })
 });
 
-router.get("/", (req, res) => {
+router.get("/", (req, res, next) => {
   // do your magic!
   Users.get(req.query)
     .then((users) => {
@@ -44,9 +40,7 @@ router.get("/", (req, res) => {
     })
     .catch((error) => {
       console.log(error);
-      res.status(500).json({
-        message: "Error retrieving users",
-      });
+      next({  message: "Error retrieving users" })
     });
 });
 
@@ -55,7 +49,7 @@ router.get("/:id", validateUserId, (req, res) => {
   res.status(200).json(req.user);
 });
 
-router.get("/:id/posts", validateUserId, (req, res) => {
+router.get("/:id/posts", validateUserId, (req, res, next) => {
   // do your magic!
   const { id } = req.params;
   Users.getUserPosts(id)
@@ -67,27 +61,22 @@ router.get("/:id/posts", validateUserId, (req, res) => {
       }
     })
     .catch((error) => {
-      res.status(500).json({
-        message: error.message, stack: error.stack
-      });
+      next({ message: error.message })
     });
 });
 
-router.delete("/:id", validateUserId, (req, res) => {
+router.delete("/:id", validateUserId, (req, res, next) => {
   // do your magic!
   Users.remove(req.params.id)
   .then(count => {
     res.status(200).json({message: 'The user has been deleted'})
   })
   .catch(error => {
-    res.status(500).json({
-      message: error.message,
-      stack: error.stack
-    })
+    next({ message: error.message })
   })
 });
 
-router.put("/:id", validateUserId, (req, res) => {
+router.put("/:id", validateUserId, (req, res, next) => {
   // do your magic!
 
   const { id } = req.params
@@ -102,10 +91,7 @@ router.put("/:id", validateUserId, (req, res) => {
     }
   })
   .catch(error => {
-    res.status(500).json({
-      message: error.message,
-      stack: error.stack
-    })
+    next({ message: error.message })
   })
 });
 
@@ -125,8 +111,8 @@ function validateUserId(req, res, next) {
       }
     })
     .catch((error) => {
-      console.log(error.message);
-      res.status(404).json({ message: "Id not found!" });
+      console.log(error.message)
+      next({ message: "Id not found!"  })
     });
 }
 
@@ -154,5 +140,10 @@ function validatePost(req, res, next) {
   }
 
 }
+
+router.use((error, req, res, next) => {
+  res.status(500).json({message: error.message})
+})
+
 
 module.exports = router;

@@ -4,15 +4,13 @@ const Posts = require("./postDb");
 
 const router = express.Router();
 
-router.get('/', (req, res) => {
+router.get('/', (req, res, next) => {
   Posts.get(req.query)
   .then(post => {
     res.status(200).json(post)
   })
   .catch(error => {
-    res.status(500).json({
-      message: error.message
-    })
+    next({ message: error.message })
   })
 });
 
@@ -22,20 +20,19 @@ router.get('/:id', validatePostId, (req, res) => { // validatePostId
 
 });
 
-router.delete('/:id', validatePostId, (req, res) => { //validatePostId
+router.delete('/:id', validatePostId, (req, res, next) => { //validatePostId
   // do your magic!
   Posts.remove(req.params.id)
   .then(count => {
     res.status(200).json({message: 'post has been deleted'})
   })
   .catch(error => {
-    res.status(500).json({
-      message: error.message
-    })
+    console.log(error);
+    next({ message: error.message })
   })
 });
 
-router.put('/:id', validatePostId, (req, res) => { // validatePostId
+router.put('/:id', validatePostId, (req, res, next) => { // validatePostId
   // do your magic!
 
   Posts.update(req.params.id, req.body)
@@ -49,9 +46,7 @@ router.put('/:id', validatePostId, (req, res) => { // validatePostId
   .catch(error => {
     // log error to server
     console.log(error);
-    res.status(500).json({
-      message: 'Error updating the hub',
-    });
+    next({ message: 'Error updating the hub'})
   });
 });
 
@@ -75,8 +70,12 @@ function validatePostId(req, res, next) {
   .catch(error => {
     console.log(error.message)
     // res.status(500).json({ message: 'something bad happened' })
-    next({ code: 500, message: 'Something crashed and burned'})
+    next({ message: 'Something crashed and burned'})
   })
 }
+
+router.use((error, req, res, next) => {
+  res.status(500).json({message: error.message})
+})
 
 module.exports = router;
